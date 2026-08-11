@@ -5,33 +5,30 @@ from dhanhq import dhanhq
 client_id = os.getenv('DHAN_CLIENT_ID')
 access_token = os.getenv('DHAN_ACCESS_TOKEN')
 
-# 2. Dhan Connection (Sahi Tarika)
-# Humne yahan 'client_id=' aur 'access_token=' likh diya hai 
-# taaki 'positional argument' wala error hamesha ke liye khatam ho jaye
-try:
-    dhan = dhanhq(client_id=client_id, access_token=access_token)
-    print("Dhan Connection Object Created! ✅")
-except Exception as e:
-    print(f"Initial Connection Error: {str(e)}")
-
-def check_balance():
+def check_connection():
     print("--- SAMRAT AI TRADER ENGINE START ---")
+    
     try:
+        # 2. Dhan Connection (Sahi Tarika)
+        # Hum seedha (Client ID, Access Token) bhej rahe hain bina keyword ke
+        dhan = dhanhq(client_id, access_token)
+        print("Dhan Connection Object Created! ✅")
+        
         # 3. Account balance check karna
-        # Dhan library mein fund check karne ka ye sahi tareeka hai
         funds = dhan.get_fund_limits()
         
         if funds.get('status') == 'success':
             data = funds.get('data', {})
-            # Balance nikalne ki koshish (Alag alag keys check kar rahe hain)
-            balance = data.get('availabelBalance') or data.get('availableBalance') or data.get('sodLimit', 0)
+            # Dhan ke different versions ke liye keys check karna
+            balance = data.get('availabelBalance') or data.get('availableBalance') or 0
             print(f"SUCCESS: Aapka Dhan Balance hai: ₹{balance}")
         else:
-            print(f"Dhan API Error: {funds.get('remarks', 'Invalid Credentials')}")
+            print("Galti: Dhan API ne response toh diya par success nahi hua.")
+            print("Message:", funds.get('remarks', 'Check API Keys'))
             
     except Exception as e:
-        print(f"Technical Error while fetching balance: {str(e)}")
+        print(f"Technical Error: {str(e)}")
+        print("Tip: Check karein ki GitHub Secrets mein Client ID aur Token ekdam sahi hain.")
 
-# --- SABSE ZAROORI: Yahan __name__ aur __main__ dhyan se dekhna ---
-if __name__ == "__main__":
-    check_balance()
+if _name_ == "_main_":
+    check_connection()
