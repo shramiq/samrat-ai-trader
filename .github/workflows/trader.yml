@@ -1,0 +1,28 @@
+name: Samrat AI Trader Engine
+on:
+  schedule:
+    - cron: '*/1 3-10 * * 1-5' # Mon-Fri, Market hours mein har 1 min chalega (UTC Time)
+  workflow_dispatch: # Manual chalane ke liye button
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-node@v2 # Python environment setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install libraries
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run AI Agent
+        env:
+          DHAN_CLIENT_ID: ${{ secrets.DHAN_CLIENT_ID }}
+          DHAN_ACCESS_TOKEN: ${{ secrets.DHAN_ACCESS_TOKEN }}
+        run: python bot.py
