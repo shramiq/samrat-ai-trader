@@ -5,9 +5,14 @@ from dhanhq import dhanhq
 client_id = os.getenv('DHAN_CLIENT_ID')
 access_token = os.getenv('DHAN_ACCESS_TOKEN')
 
-# 2. Dhan Connection (Final Fix)
-# Error ke mutabiq library sirf 1 argument (access_token) mang rahi hai
-dhan = dhanhq(access_token)
+# 2. Dhan Connection (Final Master Fix)
+# Dhan library ko teeno cheezein chahiye: Client ID, Access Token aur Account Type
+# Hum yahan 'money' use kar rahe hain jo live account ke liye hota hai
+try:
+    dhan = dhanhq(client_id, access_token, "money")
+    print("Dhan Object Created Successfully!")
+except Exception as e:
+    print(f"Connection Initialization Error: {str(e)}")
 
 def check_connection():
     print("--- SAMRAT AI TRADER ENGINE START ---")
@@ -15,23 +20,22 @@ def check_connection():
     
     try:
         # 3. Account balance check karna
-        # Yahan hum client_id ko function ke andar bhej rahe hain agar zaroorat padi toh
         funds = dhan.get_fund_limits()
         
         if funds.get('status') == 'success':
             data = funds.get('data', {})
-            # Alag-alag version mein balance ka naam alag ho sakta hai
+            # Dhan ke alag-alag versions ke balance keys
             balance = data.get('availabelBalance') or data.get('availableBalance') or data.get('sodLimit', 0)
             
             print(f"Connection Successful! ✅")
             print(f"Aapke Dhan Account mein Balance: ₹{balance}")
         else:
-            print("Galti: Dhan se connect nahi ho pa rahe.")
-            print("Dhan Message:", funds.get('remarks', 'Invalid Token'))
+            print("Galti: Dhan API ne reject kar diya.")
+            print("Message:", funds.get('remarks', 'Invalid Credentials'))
             
     except Exception as e:
-        print(f"Technical Error: {str(e)}")
-        print("Tip: Dhan Portal par jaakar naya Access Token generate karke GitHub Secrets mein update karein.")
+        print(f"Technical Error while fetching balance: {str(e)}")
+        print("Tip: Check karein ki GitHub Secrets mein Client ID aur Access Token sahi hain.")
 
 if _name_ == "_main_":
     check_connection()
