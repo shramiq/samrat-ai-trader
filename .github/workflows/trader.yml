@@ -1,27 +1,44 @@
-name: Samrat AI Trader Engine
-on:
-  schedule:
-    - cron: '*/5 3-10 * * 1-5' # Har 5 minute mein (Market Hours)
-  workflow_dispatch: # Manual button
+import os
+import pyotp
+from dhanhq import dhanhq
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+# 1. GitHub Secrets se saari chabiyaan nikalna
+client_id = os.getenv('DHAN_CLIENT_ID')
+access_token = os.getenv('DHAN_ACCESS_TOKEN')
+totp_key = os.getenv('DHAN_TOTP_KEY')
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10' # <--- Yahan 3.10 kar diya hai
+def start_samrat_engine():
+    print("--- SAMRAT AI TRADER: INITIALIZING ---")
+    
+    # 2. Live OTP generate karna (TOTP)
+    try:
+        totp = pyotp.TOTP(totp_key)
+        current_otp = totp.now()
+        print(f"Robot ne Live OTP generate kiya: {current_otp} ✅")
+    except Exception as e:
+        print(f"OTP Error: {str(e)}")
+        return
 
-      - name: Install libraries
-        run: |
-          pip install dhanhq pandas
+    # 3. Dhan Connection Setup
+    try:
+        # Dhan library ko 'client_id' aur 'access_token' bhej rahe hain
+        dhan = dhanhq(client_id, access_token)
+        
+        # Account Balance Check karna tasalli ke liye
+        funds = dhan.get_fund_limits()
+        
+        if funds.get('status') == 'success':
+            data = funds.get('data', {})
+            balance = data.get('availabelBalance') or data.get('availableBalance') or 0
+            print(f"CONNECTION SUCCESSFUL! ✅")
+            print(f"Aapke Dhan Account mein Balance: ₹{balance}")
+            print("AI Agent market scanning ke liye taiyar hai...")
+        else:
+            print("DHAN API ERROR: Token shayad expire ho gaya hai.")
+            print("Dhan Message:", funds.get('remarks'))
 
-      - name: Run AI Agent
-        env:
-          DHAN_CLIENT_ID: ${{ secrets.DHAN_CLIENT_ID }}
-          DHAN_ACCESS_TOKEN: ${{ secrets.DHAN_ACCESS_TOKEN }}
-        run: python bot.py
+    except Exception as e:
+        print(f"Technical Error: {str(e)}")
+
+if _name_ == "_main_":
+    start_samrat_engine()
