@@ -1,44 +1,31 @@
-import os
 import pyotp
 from dhanhq import dhanhq
 
+# --- BHAI YAHAN APNI DETAILS DIRECT DALO ---
+client_id = "1109242552" 
+access_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJkaGFuIiwicGFydG5lcklkIjoiIiwiZXhwIjoxNzg2NTA3NjAzLCJpYXQiOjE3ODY0MjEyMDMsInRva2VuQ29uc3VtZXJUeXBlIjoiU0VMRiIsIndlYmhvb2tVcmwiOiIiLCJkaGFuQ2xpZW50SWQiOiIxMTA5MjQyNTUyIn0.AEWUKmVnNV2dNwMbgPqpAxMnhHSJKkeNIrgr5IGEE-er_GCufTB18GJ6uF6_xy_34HJ4gDXXQKD33LH3MbjDHg"
+totp_seed = "FZW7Y5OZSGHYS62V4ZWGQIIIFB7DJZGG"
+
 print("--- SAMRAT AI TRADER STARTING ---")
 
-# 1. Secrets se data uthana
-cid = os.getenv('DHAN_CLIENT_ID')
-tok = os.getenv('DHAN_ACCESS_TOKEN')
-seed = os.getenv('DHAN_TOTP_KEY')
-
 try:
-    # 2. OTP Generate karna
-    totp = pyotp.TOTP(seed)
-    current_otp = totp.now()
-    print(f"Robot Live OTP: {current_otp} ✅")
+    # 1. Live OTP Check
+    totp = pyotp.TOTP(totp_seed)
+    print(f"Robot Live OTP: {totp.now()} ✅")
 
-    # 3. Dhan Connection (Sahi Tarika)
-    # Library ke naye version ke hisaab se sirf Access Token bhej rahe hain
-    dhan = dhanhq(client_id=cid, access_token=tok, env_type='money')
-    print("Dhan Connection Object Created! ✅")
-    
-    # 4. Balance Check
+    # 2. Dhan Connection (Basic Version)
+    # Hum sirf wahi 2 cheezein bhej rahe hain jo library maang rahi hai
+    dhan = dhanhq(client_id, access_token)
+    print("Dhan Connection: OK ✅")
+
+    # 3. Balance Check
     funds = dhan.get_fund_limits()
-    
     if funds.get('status') == 'success':
         data = funds.get('data', {})
-        # Alag alag versions mein balance ka naam alag hota hai
-        balance = data.get('availabelBalance') or data.get('availableBalance') or 0
-        print(f"SUCCESS! Connection OK. Account Balance: ₹{balance}")
+        bal = data.get('availabelBalance') or data.get('availableBalance') or 0
+        print(f"SUCCESS! Aapka Balance hai: ₹{bal}")
     else:
-        print(f"Dhan API Message: {funds.get('remarks')}")
+        print("API Error:", funds.get('remarks'))
 
 except Exception as e:
-    # Agar abhi bhi positional error aaye, toh ye backup chalega
-    print("Trying Backup Connection Method...")
-    try:
-        from dhanhq import dhanhq
-        dhan = dhanhq(tok) # Sirf token ke saath
-        funds = dhan.get_fund_limits()
-        balance = funds['data']['availabelBalance']
-        print(f"SUCCESS (Backup)! Account Balance: ₹{balance}")
-    except:
-        print(f"Final Technical Error: {str(e)}")
+    print("Technical Error:", str(e))
