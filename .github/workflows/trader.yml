@@ -1,8 +1,8 @@
 name: Samrat AI Trader Engine
 on:
   schedule:
-    - cron: '*/5 3-10 * * 1-5' # Har 5 minute mein chalega (Market Hours)
-  workflow_dispatch: # Manual button ke liye
+    - cron: '*/5 3-10 * * 1-5' # Har 5 minute mein (Market Hours)
+  workflow_dispatch: # Manual button
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10' # <--- Yahan 3.10 kar diya hai
 
       - name: Install libraries
         run: |
