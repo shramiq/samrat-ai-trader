@@ -4,7 +4,7 @@ from dhanhq import dhanhq
 
 print("--- SAMRAT AI TRADER STARTING ---")
 
-# 1. GitHub Secrets se keys uthana
+# 1. Secrets se data uthana
 cid = os.getenv('DHAN_CLIENT_ID')
 tok = os.getenv('DHAN_ACCESS_TOKEN')
 seed = os.getenv('DHAN_TOTP_KEY')
@@ -15,9 +15,10 @@ try:
     current_otp = totp.now()
     print(f"Robot Live OTP: {current_otp} ✅")
 
-    # 3. Dhan Connection (Sahi version)
-    # Dhan library ko Client ID, Token aur 'money' type chahiye
-    dhan = dhanhq(cid, tok, "money")
+    # 3. Dhan Connection (Sahi Tarika)
+    # Library ke naye version ke hisaab se sirf Access Token bhej rahe hain
+    dhan = dhanhq(client_id=cid, access_token=tok, env_type='money')
+    print("Dhan Connection Object Created! ✅")
     
     # 4. Balance Check
     funds = dhan.get_fund_limits()
@@ -31,4 +32,13 @@ try:
         print(f"Dhan API Message: {funds.get('remarks')}")
 
 except Exception as e:
-    print(f"Galti: {str(e)}")
+    # Agar abhi bhi positional error aaye, toh ye backup chalega
+    print("Trying Backup Connection Method...")
+    try:
+        from dhanhq import dhanhq
+        dhan = dhanhq(tok) # Sirf token ke saath
+        funds = dhan.get_fund_limits()
+        balance = funds['data']['availabelBalance']
+        print(f"SUCCESS (Backup)! Account Balance: ₹{balance}")
+    except:
+        print(f"Final Technical Error: {str(e)}")
