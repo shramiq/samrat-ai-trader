@@ -1,14 +1,14 @@
 import os
 from dhanhq import dhanhq
 
-# 1. Chabi uthana
-access_token = os.getenv('DHAN_ACCESS_TOKEN')
+# 1. GitHub Secrets se keys uthana
 client_id = os.getenv('DHAN_CLIENT_ID')
+access_token = os.getenv('DHAN_ACCESS_TOKEN')
 
-# 2. Dhan Connection (Sahi Tarika)
-# Error ke mutabiq library ko sirf 1 chiz chahiye: access_token
+# 2. Dhan Connection (Sahi aur Final Tarika)
+# Dhan library ko 'money' likh kar batana padta hai ki ye asli account hai
 try:
-    dhan = dhanhq(access_token)
+    dhan = dhanhq(client_id, access_token, "money")
     print("Dhan Connection Object Created! ✅")
 
     print("--- SAMRAT AI TRADER ENGINE STARTING ---")
@@ -18,11 +18,11 @@ try:
     
     if funds.get('status') == 'success':
         data = funds.get('data', {})
-        # Balance nikalne ka rasta
+        # Alag-alag version ke liye balance check
         balance = data.get('availabelBalance') or data.get('availableBalance') or 0
         print(f"SUCCESS: Aapka Dhan Balance hai: ₹{balance}")
     else:
-        print("Dhan API Error:", funds.get('remarks', 'Invalid Token'))
+        print("API Error:", funds.get('remarks', 'Invalid Credentials'))
 
 except Exception as e:
     print("Technical Error:", str(e))
