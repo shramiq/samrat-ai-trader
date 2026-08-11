@@ -5,12 +5,11 @@ from dhanhq import dhanhq
 client_id = os.getenv('DHAN_CLIENT_ID')
 access_token = os.getenv('DHAN_ACCESS_TOKEN')
 
-def check_connection():
-    print("--- SAMRAT AI TRADER ENGINE START ---")
-    
+def run_bot():
+    print("--- SAMRAT AI TRADER ENGINE STARTING ---")
     try:
-        # 2. Dhan Connection (Sahi Tarika)
-        # Hum seedha (Client ID, Access Token) bhej rahe hain bina keyword ke
+        # 2. Dhan Connection (Dhyan se dekhna)
+        # Hum bina keyword ke bhej rahe hain: Client ID aur Access Token
         dhan = dhanhq(client_id, access_token)
         print("Dhan Connection Object Created! ✅")
         
@@ -23,12 +22,11 @@ def check_connection():
             balance = data.get('availabelBalance') or data.get('availableBalance') or 0
             print(f"SUCCESS: Aapka Dhan Balance hai: ₹{balance}")
         else:
-            print("Galti: Dhan API ne response toh diya par success nahi hua.")
-            print("Message:", funds.get('remarks', 'Check API Keys'))
+            print(f"Dhan API Error: {funds.get('remarks', 'Invalid Credentials')}")
             
     except Exception as e:
-        print(f"Technical Error: {str(e)}")
-        print("Tip: Check karein ki GitHub Secrets mein Client ID aur Token ekdam sahi hain.")
+        print(f"Galti: {str(e)}")
 
+# --- DHAYAN DEIN: Yahan do-do (__) dash lagaye hain maine ---
 if _name_ == "_main_":
-    check_connection()
+    run_bot()
