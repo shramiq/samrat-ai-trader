@@ -5,37 +5,31 @@ from dhanhq import dhanhq
 client_id = os.getenv('DHAN_CLIENT_ID')
 access_token = os.getenv('DHAN_ACCESS_TOKEN')
 
-# 2. Dhan Connection (Final Master Fix)
-# Dhan library ko teeno cheezein chahiye: Client ID, Access Token aur Account Type
-# Hum yahan 'money' use kar rahe hain jo live account ke liye hota hai
+# 2. Dhan Connection (Sahi Tarika)
+# Library ko keyword ke saath bata rahe hain taaki positional error na aaye
 try:
-    dhan = dhanhq(client_id, access_token, "money")
-    print("Dhan Object Created Successfully!")
+    dhan = dhanhq(client_id=client_id, access_token=access_token)
+    print("Dhan Connection Object Created! ✅")
 except Exception as e:
-    print(f"Connection Initialization Error: {str(e)}")
+    print(f"Initial Connection Error: {str(e)}")
 
-def check_connection():
+def check_balance():
     print("--- SAMRAT AI TRADER ENGINE START ---")
-    print(f"Checking account for Client ID: {client_id}")
-    
     try:
-        # 3. Account balance check karna
+        # Account balance fetch karna
         funds = dhan.get_fund_limits()
         
         if funds.get('status') == 'success':
             data = funds.get('data', {})
-            # Dhan ke alag-alag versions ke balance keys
-            balance = data.get('availabelBalance') or data.get('availableBalance') or data.get('sodLimit', 0)
-            
-            print(f"Connection Successful! ✅")
-            print(f"Aapke Dhan Account mein Balance: ₹{balance}")
+            # Dhan ke alag-alag version ke liye keys
+            balance = data.get('availabelBalance') or data.get('availableBalance') or 0
+            print(f"SUCCESS: Aapka Dhan Balance hai: ₹{balance}")
         else:
-            print("Galti: Dhan API ne reject kar diya.")
-            print("Message:", funds.get('remarks', 'Invalid Credentials'))
+            print(f"API Error: {funds.get('remarks', 'Invalid Token')}")
             
     except Exception as e:
-        print(f"Technical Error while fetching balance: {str(e)}")
-        print("Tip: Check karein ki GitHub Secrets mein Client ID aur Access Token sahi hain.")
+        print(f"Technical Error: {str(e)}")
 
+# --- DHAYAN DEIN: Yahan double underscore (__) zaroori hai ---
 if _name_ == "_main_":
-    check_connection()
+    check_balance()
